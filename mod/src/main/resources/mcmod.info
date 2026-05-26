@@ -1,0 +1,13 @@
+[
+  {
+    "modid": "voidclient",
+    "name": "Void Client",
+    "description": "Client-side PvP client mod para Minecraft 1.8.9 com HUD, menu e módulos próprios.",
+    "version": "1.0.0",
+    "authorList": ["Void Client Team"],
+    "url": "https://example.com/voidclient",
+    "credits": "Criação original e segura.",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

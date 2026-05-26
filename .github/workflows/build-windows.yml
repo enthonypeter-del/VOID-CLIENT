@@ -1,0 +1,47 @@
+name: Build Windows Installer
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: {}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Java 17 (Temurin)
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Download JavaFX SDK 17 (Windows x64)
+      shell: powershell
+      run: |
+        $url = 'https://github.com/openjdk/jfx/releases/download/jfx-17.0.8/openjfx-17.0.8_windows-x64_bin-sdk.zip'
+        Write-Host "Downloading JavaFX SDK from $url"
+        Invoke-WebRequest -Uri $url -OutFile javafx-sdk.zip
+        Expand-Archive javafx-sdk.zip -DestinationPath javafx-sdk
+        Write-Host "JavaFX SDK extracted to javafx-sdk"
+
+    - name: Run Gradle createInstaller
+      shell: powershell
+      run: |
+        cd "$env:GITHUB_WORKSPACE"
+        $env:JAVA_HOME = "${{ runner.tool_cache }}/windows/temurin/17/x64"
+        $env:Path = "$env:JAVA_HOME\bin;$env:Path"
+        Write-Host "Using JAVA_HOME=$env:JAVA_HOME"
+        .\gradle-local.bat :launcher:createInstaller -PjavafxSdk="$PWD\javafx-sdk\lib"
+
+    - name: Upload installer artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: voidclient-windows-installer
+        path: |
+          **/build/*installer*.exe
+          **/build/**/VoidClientLauncher*.exe
+          **/build/**/VoidClientLauncher*.msi
